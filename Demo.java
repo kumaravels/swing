@@ -1,3 +1,4 @@
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -81,8 +82,11 @@ public class Demo {
 		headerLabel.setText("Choose file:");
 		final JFileChooser fileDialog = new JFileChooser();
 		JButton showFileDialogButton = new JButton("Browse Ticket Dump File");
+		
+		headerPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
-		mainFrame.add(headerPanel);
+		//mainFrame.add(headerPanel);
+		mainFrame.add(headerPanel, BorderLayout.NORTH);
 
 		showFileDialogButton.addActionListener(new ActionListener() {
 			@Override
@@ -124,14 +128,12 @@ public class Demo {
 					// Set row height
 					tblMap.setRowHeight(20);
 
-					tblMap.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-					tblMap.setSize(300, 500);
-					tblMap.setPreferredScrollableViewportSize(tblMap
-							.getPreferredSize());
-
+					
 					tablePanel = new JPanel();
-					tablePanel.add(new JScrollPane(tblMap), "Center");
-					tablePanel.setSize(300, 500);
+					tablePanel.add(new JScrollPane(tblMap));
+					tablePanel.setSize(300, 400);
+					
+					tablePanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
 					generateButton = new JButton();
 					generateButton
@@ -149,14 +151,21 @@ public class Demo {
 
 					bottomPanel = new JPanel();
 					bottomPanel.add(generateButton);
+					
+					bottomPanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
-					allPanel = new JPanel();
+					/*allPanel = new JPanel();
 					allPanel.add(headerPanel);
 					allPanel.add(tablePanel);
-					allPanel.add(bottomPanel);
+					allPanel.add(bottomPanel);*/
 
-					mainFrame.add(allPanel);
+					//mainFrame.add(allPanel);
+					//mainFrame.add(headerPanel, BorderLayout.NORTH);
+					mainFrame.add(tablePanel, BorderLayout.CENTER);
+					mainFrame.add(bottomPanel,BorderLayout.SOUTH);
 					mainFrame.setVisible(true);
+					
+					
 					// ///////////////////
 				} else {
 					// statusLabel.setText("Open command cancelled by user." );
@@ -256,8 +265,7 @@ class ComboBoxTableModel extends AbstractTableModel {
 
 	protected static int colCount;
 	protected Object[][] data;
-	protected static final String[] validStates = {
-			// "On order", "In stock", "Out of print"
+	protected static final String[] validStates = {			
 			" ", "0:Incident", "1:Type", "2:Priority", "3:Created",
 			"4:Resolved", "5:Closed", "6:Status", "7:Assigned To",
 			"8:Assignment Group", "9:Tower", "10:Severity",
