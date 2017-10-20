@@ -1,6 +1,8 @@
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -9,7 +11,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Vector;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
@@ -21,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -37,12 +43,15 @@ public class Demo {
 	private JPanel controlPanel;
 	private static String sourceFileName;
 	private JTable tblMap;
+	private JTable tblCategory;
 	private JPanel tablePanel;
 	private JButton generateButton;
-	private JPanel bottomPanel;
-	private JPanel allPanel;
-	private int sourceColCount;
-
+	private JPanel bottomPanel;	
+	private HashMap<String, String> hashMapCategory;
+	private static final int PRIMARY_CATEGORY_COL_INDEX=28;
+	private static final int SECONDARY_CATEGORY_COL_INDEX=27;
+	private static final int REASON_CODE_COL_INDEX=26;
+	
 	public Demo() throws Exception {
 		prepareGUI();
 	}
@@ -55,7 +64,7 @@ public class Demo {
 	private void prepareGUI() throws Exception {
 		mainFrame = new JFrame("ASM Ticket Analysis");
 		mainFrame.setSize(750, 600);
-		// mainFrame.setLayout(new GridLayout(3, 1));
+		hashMapCategory = new HashMap<String, String>();
 
 		mainFrame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent windowEvent) {
@@ -75,9 +84,20 @@ public class Demo {
 
 		headerPanel.add(headerLabel);
 		headerPanel.add(controlPanel);
+		
+		DefaultTableModel dm = new DefaultTableModel(0, 0);
+	    String headerColumns[] = new String[] { "Key Words", "Primary", "Secondary", "Reason" };
+	    dm.setColumnIdentifiers(headerColumns);	    
+	    tblCategory = new JTable();
+	    tblCategory.setModel(dm);	    
+	    loadCategoryData(dm);	
+	    Dimension preferredSize = new Dimension(700,100);	    
+	    JScrollPane jscrollCategory = new JScrollPane(tblCategory);
+	    jscrollCategory.setPreferredSize(preferredSize);	   
+	    headerPanel.add(jscrollCategory); 
 
 		headerPanel.setLayout(new FlowLayout());
-		headerPanel.setSize(100, 50);
+		headerPanel.setSize(100, 100);
 
 		headerLabel.setText("Choose file:");
 		final JFileChooser fileDialog = new JFileChooser();
@@ -126,11 +146,11 @@ public class Demo {
 					tcm.getColumn(1).setPreferredWidth(150);
 
 					// Set row height
-					tblMap.setRowHeight(20);
-
+					tblMap.setRowHeight(20);							        
 					
 					tablePanel = new JPanel();
 					tablePanel.add(new JScrollPane(tblMap));
+					//tablePanel.add();
 					tablePanel.setSize(300, 400);
 					
 					tablePanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -178,6 +198,82 @@ public class Demo {
 	private void showFileChooserDemo(String fileName) throws IOException {
 		mainFrame.setVisible(true);
 	}
+	
+	private void loadCategoryData(DefaultTableModel dm){
+		Vector<Object> dataRow = new Vector<Object>();
+        //Password
+        dataRow.add("password/reset/login");        
+        hashMapCategory.put("password", "Access;Login /Password Issues;Password reset");
+        hashMapCategory.put("reset", "Access;Login /Password Issues;Password reset");
+        hashMapCategory.put("login", "Access;Login /Password Issues;Password reset");
+        dataRow.add("Access");
+        dataRow.add("Login /Password Issues");
+        dataRow.add("Password reset");
+        dm.addRow(dataRow);
+	    //Access
+        dataRow = new Vector<Object>();				        
+        dataRow.add("access/role/account/permission");
+        hashMapCategory.put("access", "Access;Giving Permission to different role/application;Access Related Issues");
+        hashMapCategory.put("role", "Access;Giving Permission to different role/application;Access Related Issues");
+        hashMapCategory.put("account", "Access;Giving Permission to different role/application;Access Related Issues");
+        hashMapCategory.put("permission", "Access;Giving Permission to different role/application;Access Related Issues");
+        hashMapCategory.put("Authorization", "Access;Authorization error;Access Related Issues");
+        hashMapCategory.put("User Creation", "Access;User Creation/Modification;Access Related Issues");
+        dataRow.add("Access");
+        dataRow.add("Giving Permission to different role/application");
+        dataRow.add("Access Related Issues");        
+        dm.addRow(dataRow);
+        //Db
+        dataRow = new Vector<Object>();				        
+        dataRow.add("datafix/dbscript/script/sql/query/oracle");
+        hashMapCategory.put("datafix", "Database;Execution of DML or SPs;Datafix");
+        hashMapCategory.put("dbscript", "Database;Execution of DML or SPs;Datafix");
+        hashMapCategory.put("script", "Database;Execution of DML or SPs;Datafix");
+        hashMapCategory.put("sql", "Database;Execution of DML or SPs;Datafix");
+        hashMapCategory.put("query", "Database;Execution of DML or SPs;Datafix");
+        hashMapCategory.put("oracle", "Database;Execution of DML or SPs;Datafix");        
+        dataRow.add("Database");
+        dataRow.add("Static data changes");
+        dataRow.add("Datafix");
+        dm.addRow(dataRow);        
+        //Restart
+        dataRow = new Vector<Object>();				        
+        dataRow.add("restart/reboot");
+        hashMapCategory.put("restart", "Generic IT;Restart;Restart Server");
+        hashMapCategory.put("Restart", "Generic IT;Restart;Restart Server");
+        hashMapCategory.put("restarted", "Generic IT;Restart;Restart Server");
+        hashMapCategory.put("reboot", "Generic IT;Restart;Restart Server");
+        hashMapCategory.put("Reboot", "Generic IT;Restart;Restart Server");
+        hashMapCategory.put("rebooted", "Generic IT;Restart;Restart Server");
+        dataRow.add("Generic IT");
+        dataRow.add("Restart");
+        dataRow.add("Restart Server");
+        dm.addRow(dataRow);
+        //File Operations
+        dataRow = new Vector<Object>();
+        dataRow.add("File Operations");
+        hashMapCategory.put("File Operations", "Directory / File Operations;File operations;File operations");
+        hashMapCategory.put("File Operations", "Directory / File Operations;File operations;File operations");
+        hashMapCategory.put("File Operations", "Directory / File Operations;File operations;File operations");        
+        dataRow.add("Directory / File Operations");
+        dataRow.add("File operations");
+        dataRow.add("File operations");
+        dm.addRow(dataRow);
+        //Batch issue
+        dataRow = new Vector<Object>();				        
+        dataRow.add("Batch issue");
+        hashMapCategory.put("Batch issue", "Batch issue;Batch failure (Job Status, Job Failure, Job not completed, Job Aborted);Batch issue");
+        hashMapCategory.put("batch", "Batch issue;Batch failure (Job Status, Job Failure, Job not completed, Job Aborted);Batch issue");
+        hashMapCategory.put("Batch Failure", "Batch issue;Batch failure (Job Status, Job Failure, Job not completed, Job Aborted);Batch issue");
+        hashMapCategory.put("Job Failure", "Batch issue;Batch failure (Job Status, Job Failure, Job not completed, Job Aborted);Batch issue");
+        hashMapCategory.put("Job not completed", "Batch issue;Batch failure (Job Status, Job Failure, Job not completed, Job Aborted);Batch issue");
+        hashMapCategory.put("Job Aborted", "Batch issue;Batch failure (Job Status, Job Failure, Job not completed, Job Aborted);Batch issue");
+        dataRow.add("Batch issue");
+        dataRow.add("Batch failure (Job Status, Job Failure, Job not completed, Job Aborted)");
+        dataRow.add("Batch issue");
+        dm.addRow(dataRow);
+        
+	}
 
 	private void generateData() {
 		try {
@@ -209,36 +305,16 @@ public class Demo {
 							Iterator<Cell> cellIterator = row.cellIterator();
 							
 							while(cellIterator.hasNext()){
-								Cell cell = cellIterator.next();
+								Cell sourcecell = cellIterator.next();
 								
-								if (cell.getColumnIndex() == columnIndex) {
+								if (sourcecell.getColumnIndex() == columnIndex) {
 																		
-									XSSFRow rowDestination = spreadsheetDest.getRow(cell.getRowIndex());
-									Cell columnDestination = null;
-									if (rowDestination != null) {
-										columnDestination = rowDestination.getCell(destinationColumnIndex);
-										if (columnDestination == null) {
-											columnDestination = rowDestination.createCell(destinationColumnIndex);
-										}
-									}else {
-										rowDestination = spreadsheetDest.createRow(cell.getRowIndex());
-										columnDestination = rowDestination.createCell(destinationColumnIndex);
-									}
-									switch (cell.getCellType())
-									{
-										case Cell.CELL_TYPE_STRING:
-											
-											columnDestination.setCellValue(cell
-													.getStringCellValue());											
-										break;
-										case Cell.CELL_TYPE_NUMERIC:											
-											columnDestination.setCellValue(cell
-													.getNumericCellValue());		
-										break;
-									}
-									break;
-									
+									setSourceCellDataToDestination(
+											spreadsheetDest,
+											destinationColumnIndex, sourcecell);																		
 								}
+								performSearchCategory(spreadsheetDest,destinationColumnIndex,sourcecell);
+								
 							}
 						}
 
@@ -255,6 +331,66 @@ public class Demo {
 
 		} catch (Exception ex) {
 			System.out.println(ex);
+		}
+	}
+
+	private void setSourceCellDataToDestination(XSSFSheet spreadsheetDest,
+			int destinationColumnIndex, Cell sourceCell) {
+		XSSFRow rowDestination = spreadsheetDest.getRow(sourceCell.getRowIndex());
+		Cell columnDestination = null;
+		if (rowDestination != null) {
+			columnDestination = rowDestination.getCell(destinationColumnIndex);
+			if (columnDestination == null) {
+				columnDestination = rowDestination.createCell(destinationColumnIndex);
+			}
+		}else {
+			rowDestination = spreadsheetDest.createRow(sourceCell.getRowIndex());
+			columnDestination = rowDestination.createCell(destinationColumnIndex);
+		}
+		switch (sourceCell.getCellType())
+		{
+			case Cell.CELL_TYPE_STRING:
+				
+				columnDestination.setCellValue(sourceCell
+						.getStringCellValue());											
+			break;
+			case Cell.CELL_TYPE_NUMERIC:											
+				columnDestination.setCellValue(sourceCell
+						.getNumericCellValue());		
+			break;
+		}
+	}
+	
+	private void performSearchCategory(XSSFSheet spreadsheetDest,
+			int destinationColumnIndex, Cell sourceCell){
+		if (sourceCell.getCellType() == Cell.CELL_TYPE_STRING){
+			for(Map.Entry<String, String> entry : hashMapCategory.entrySet()){
+				if (sourceCell.getStringCellValue().contains(entry.getKey())){
+					XSSFRow rowDestination = spreadsheetDest.getRow(sourceCell.getRowIndex());
+					Cell columnDestination = null;
+					if (rowDestination != null) {
+						columnDestination = rowDestination.getCell(REASON_CODE_COL_INDEX);
+						if (columnDestination == null) {
+							columnDestination = rowDestination.createCell(destinationColumnIndex);
+						}
+					}else {
+						rowDestination = spreadsheetDest.createRow(sourceCell.getRowIndex());
+						columnDestination = rowDestination.createCell(REASON_CODE_COL_INDEX);
+					}
+					String[] categoryValues = entry.getValue().split(";");
+					columnDestination.setCellValue(categoryValues[2]);	
+					columnDestination = rowDestination.getCell(SECONDARY_CATEGORY_COL_INDEX);
+					if (columnDestination == null){
+						columnDestination = rowDestination.createCell(SECONDARY_CATEGORY_COL_INDEX);
+					}
+					columnDestination.setCellValue(categoryValues[1]);
+					columnDestination = rowDestination.getCell(PRIMARY_CATEGORY_COL_INDEX);
+					if (columnDestination == null){
+						columnDestination = rowDestination.createCell(PRIMARY_CATEGORY_COL_INDEX);
+					}
+					columnDestination.setCellValue(categoryValues[0]);
+				}
+			}
 		}
 	}
 
