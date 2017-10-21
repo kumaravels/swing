@@ -20,6 +20,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -43,7 +44,7 @@ public class Demo {
 	private JTable tblMap;
 	private JTable tblCategory;
 	private JProgressBar pbStatus;
-	//private JLabel progressStatusLabel;
+	// private JLabel progressStatusLabel;
 	private HashMap<String, String> hashMapCategory;
 	private static final int PRIMARY_CATEGORY_COL_INDEX = 28;
 	private static final int SECONDARY_CATEGORY_COL_INDEX = 27;
@@ -81,6 +82,9 @@ public class Demo {
 
 		headerPanel.add(headerLabel);
 		headerPanel.add(controlPanel);
+		
+		//Generate ASM Template Excel
+		createASMTemplateExcel();
 
 		DefaultTableModel dm = new DefaultTableModel(0, 0);
 		String headerColumns[] = new String[] { "Key Words", "Primary", "Secondary", "Reason" };
@@ -117,13 +121,13 @@ public class Demo {
 					// statusLabel.setText("File Selected :" + file.getName());
 					sourceFileName = file.getAbsolutePath();
 					statusLabel.setText(sourceFileName);
-					
+
 					// refreshScreen();
 					// ////////////////////
 					try {
 						tblMap = new JTable(new ComboBoxTableModel(sourceFileName));
 					} catch (IOException e1) {
-						e1.printStackTrace();
+						JOptionPane.showMessageDialog(mainFrame, e1.getMessage());
 					}
 
 					// Create the combo box editor
@@ -141,7 +145,7 @@ public class Demo {
 					tcm.getColumn(1).setPreferredWidth(150);
 
 					// Set row height
-					tblMap.setRowHeight(20);					
+					tblMap.setRowHeight(20);
 
 					JPanel tablePanel = new JPanel();
 					tablePanel.add(new JScrollPane(tblMap));
@@ -149,7 +153,7 @@ public class Demo {
 					tablePanel.setSize(300, 400);
 
 					tablePanel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-					
+
 					JButton btnViewTicketDumpExcel = new JButton();
 					btnViewTicketDumpExcel.setText("View Ticket Dump Excel");
 					btnViewTicketDumpExcel.addActionListener(new ActionListener() {
@@ -158,7 +162,7 @@ public class Demo {
 							try {
 								showPopupExcelData(sourceFileName);
 							} catch (IOException e1) {
-								e1.printStackTrace();
+								JOptionPane.showMessageDialog(mainFrame, e1.getMessage());
 							}
 						}
 					});
@@ -184,13 +188,12 @@ public class Demo {
 							try {
 								showPopupExcelData("ASM.xlsx");
 							} catch (IOException e1) {
-								e1.printStackTrace();
+								JOptionPane.showMessageDialog(mainFrame, e1.getMessage());
 							}
 						}
 					});
-					
-					
-					pbStatus = new JProgressBar();									
+
+					pbStatus = new JProgressBar();
 
 					JPanel bottomPanel = new JPanel();
 					bottomPanel.add(btnViewTicketDumpExcel);
@@ -207,7 +210,7 @@ public class Demo {
 
 					// mainFrame.add(allPanel);
 					// mainFrame.add(headerPanel, BorderLayout.NORTH);
-					mainFrame.add(tablePanel, BorderLayout.CENTER);					
+					mainFrame.add(tablePanel, BorderLayout.CENTER);
 					mainFrame.add(bottomPanel, BorderLayout.SOUTH);
 					mainFrame.setVisible(true);
 
@@ -302,7 +305,7 @@ public class Demo {
 			String secondaryString = (String) tblCategory.getValueAt(rowIndex, 2);
 			String reasonCodeString = (String) tblCategory.getValueAt(rowIndex, 3);
 			for (String strKey : keys) {
-				hashMapCategory.put(strKey, primaryString + ";" + secondaryString + ";" + reasonCodeString);				
+				hashMapCategory.put(strKey, primaryString + ";" + secondaryString + ";" + reasonCodeString);
 			}
 
 		}
@@ -313,15 +316,15 @@ public class Demo {
 	private void generateData() {
 		try {
 			pbStatus.setValue(0);
-		    pbStatus.setVisible(true);
-		    
+			pbStatus.setVisible(true);
+
 			FileInputStream fis = new FileInputStream(sourceFileName);
 			FileInputStream fisDestination = new FileInputStream("ASM.xlsx");
 			XSSFWorkbook workbook = new XSSFWorkbook(fis);
 			XSSFWorkbook workbookDestination = new XSSFWorkbook(fisDestination);
 			XSSFSheet spreadsheet = workbook.getSheetAt(0);
 			XSSFSheet spreadsheetDest = workbookDestination.getSheetAt(0);
-			
+
 			for (int rowIndex = 0; rowIndex < ComboBoxTableModel.colCount; rowIndex++) {
 				String destinationColIndex = tblMap.getValueAt(rowIndex, 1).toString().trim();
 				if (!destinationColIndex.isEmpty()) {
@@ -333,6 +336,7 @@ public class Demo {
 
 						destinationColIndex = destinationColIndex.split(":")[0];
 						int destinationColumnIndex = Integer.parseInt(destinationColIndex);
+						pbStatus.setMaximum(spreadsheet.getPhysicalNumberOfRows());
 						Iterator<Row> rowIterator = spreadsheet.iterator();
 						XSSFRow row = (XSSFRow) rowIterator.next();
 						while (rowIterator.hasNext()) {
@@ -357,14 +361,14 @@ public class Demo {
 			}
 			FileOutputStream out = new FileOutputStream("ASM.xlsx");
 			workbookDestination.write(out);
-			out.close();			
+			out.close();
 			fis.close();
 			fisDestination.close();
-			pbStatus.setMaximum(pbStatus.getValue());			
-			pbStatus.setString("Data Migrated into ASM Template");
+			pbStatus.setMaximum(pbStatus.getValue());
+			JOptionPane.showMessageDialog(mainFrame, "Data Migrated Successfully into ASM Template!!!");
 
 		} catch (Exception ex) {
-			System.out.println(ex);
+			JOptionPane.showMessageDialog(mainFrame, ex.getMessage());
 		}
 	}
 
@@ -423,8 +427,7 @@ public class Demo {
 			}
 		}
 	}
-	
-	
+
 	@SuppressWarnings({ "resource" })
 	private void showPopupExcelData(String excelFileName) throws IOException {
 		final JFrame popupFrame = new JFrame("View Excel File : " + excelFileName);
@@ -440,9 +443,9 @@ public class Demo {
 		DefaultTableModel dmPopup = new DefaultTableModel(0, 0);
 		int excelColumnCount = 0;
 
-		FileInputStream fis = new FileInputStream(excelFileName);		
+		FileInputStream fis = new FileInputStream(excelFileName);
 
-		XSSFWorkbook workbook = new XSSFWorkbook(fis);		
+		XSSFWorkbook workbook = new XSSFWorkbook(fis);
 		XSSFSheet spreadsheet = workbook.getSheetAt(0);
 
 		excelColumnCount = spreadsheet.getRow(0).getPhysicalNumberOfCells();
@@ -494,6 +497,91 @@ public class Demo {
 		}
 		popupFrame.add(panel);
 		popupFrame.setVisible(true);
+	}
+
+	@SuppressWarnings("resource")
+	private void createASMTemplateExcel() throws IOException {
+		File file = new File("ASM.xlsx");
+		if (file.exists()) {
+			file.delete();
+		}
+
+		XSSFWorkbook workbook = new XSSFWorkbook();
+		XSSFSheet spreadsheet = workbook.createSheet("formula");
+		XSSFRow row = spreadsheet.createRow(0);
+		XSSFCell cell = row.createCell(0);
+		cell.setCellValue("Incident");
+		cell = row.createCell(1);
+		cell.setCellValue("Type");
+		cell = row.createCell(2);
+		cell.setCellValue("Priority");
+		cell = row.createCell(3);
+		cell.setCellValue("Created");
+		//cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+		cell = row.createCell(4);
+		cell.setCellValue("Resolved");
+		//cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+		cell = row.createCell(5);
+		cell.setCellValue("Closed");
+		//cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+		cell = row.createCell(6);
+		cell.setCellValue("Status");
+		cell = row.createCell(7);
+		cell.setCellValue("Assigned To");
+		cell = row.createCell(8);
+		cell.setCellValue("Assignment Group");
+		cell = row.createCell(9);
+		cell.setCellValue("Tower");
+		cell = row.createCell(10);
+		cell.setCellValue("Severity");
+		cell = row.createCell(11);
+		cell.setCellValue("Reassignment count");
+		//cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+		cell = row.createCell(12);
+		cell.setCellValue("Short Description");
+		cell = row.createCell(13);
+		cell.setCellValue("Description");
+		cell = row.createCell(14);
+		cell.setCellValue("Causing CI");
+		cell = row.createCell(15);
+		cell.setCellValue("Effort (Hrs)");
+		cell = row.createCell(16);
+		cell.setCellValue("KeDB referred");
+		cell = row.createCell(17);
+		cell.setCellValue("Rd_Mon");
+		cell = row.createCell(18);
+		cell.setCellValue("CR_Mon");
+		cell = row.createCell(19);
+		cell.setCellValue("MON");
+		cell = row.createCell(20);
+		cell.setCellValue("DAY");
+		cell = row.createCell(21);
+		cell.setCellValue("TIME");
+		cell = row.createCell(22);
+		cell.setCellValue("MTTR (Duration - Days)");
+		cell = row.createCell(23);
+		cell.setCellValue("Rd_MTTR");
+		cell = row.createCell(24);
+		cell.setCellValue("Product Type");
+		cell = row.createCell(25);
+		cell.setCellValue("Technology");
+		cell = row.createCell(26);
+		cell.setCellValue("Reason Code");
+		cell = row.createCell(27);
+		cell.setCellValue("Secondary Category");
+		cell = row.createCell(28);
+		cell.setCellValue("Primary Category");
+		cell = row.createCell(29);
+		cell.setCellValue("3R Analysis");
+		cell = row.createCell(30);
+		cell.setCellValue("L1.5 Scope");
+
+		workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
+
+		FileOutputStream out = new FileOutputStream(new File("ASM.xlsx"));
+		workbook.write(out);
+		out.close();
+		System.out.println("ASM.xlsx Created successfully");
 	}
 }
 
@@ -592,3 +680,4 @@ class ComboBoxTableModel extends AbstractTableModel {
 	protected static final String[] columnNames = { "Source Dump", "Existing ASM Template" };
 
 }
+
