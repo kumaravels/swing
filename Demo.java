@@ -46,6 +46,18 @@ public class Demo {
 	private JProgressBar pbStatus;
 	// private JLabel progressStatusLabel;
 	private HashMap<String, String> hashMapCategory;
+	private static final int CREATED_COL_INDEX = 3;
+	private static final int RESOLVED_COL_INDEX = 4;
+	private static final int CLOSED_COL_INDEX = 5;
+	private static final int REASSIGNMENT_COUNT = 11;
+	private static final int EFFORT_HRS = 15; 
+	private static final int RD_MON = 17;
+	private static final int CR_MON = 18;
+	private static final int MON = 19;
+	private static final int DAY = 20;
+	private static final int TIME = 21;
+	private static final int MTTR_DURATION_DAYS = 22;
+	private static final int RD_MTTR = 23;	
 	private static final int PRIMARY_CATEGORY_COL_INDEX = 28;
 	private static final int SECONDARY_CATEGORY_COL_INDEX = 27;
 	private static final int REASON_CODE_COL_INDEX = 26;
@@ -59,7 +71,7 @@ public class Demo {
 		swingControlDemo.showFileChooserDemo(sourceFileName);
 	}
 
-	private void prepareGUI() throws Exception {
+	private void prepareGUI() throws IOException {
 		mainFrame = new JFrame("ASM Ticket Analysis");
 		mainFrame.setSize(750, 600);
 		hashMapCategory = new HashMap<String, String>();
@@ -82,8 +94,8 @@ public class Demo {
 
 		headerPanel.add(headerLabel);
 		headerPanel.add(controlPanel);
-		
-		//Generate ASM Template Excel
+
+		// Generate ASM Template Excel
 		createASMTemplateExcel();
 
 		DefaultTableModel dm = new DefaultTableModel(0, 0);
@@ -175,7 +187,11 @@ public class Demo {
 						@Override
 						public void actionPerformed(ActionEvent e) {
 							// ////////////////////
-							generateData();
+							try {
+								generateData();
+							} catch (IOException e1) {
+								JOptionPane.showMessageDialog(mainFrame, e1.getMessage());
+							}
 							// ////////////////////
 						}
 					});
@@ -312,8 +328,7 @@ public class Demo {
 
 	}
 
-	@SuppressWarnings("resource")
-	private void generateData() {
+	private void generateData() throws IOException {
 		try {
 			pbStatus.setValue(0);
 			pbStatus.setVisible(true);
@@ -351,25 +366,155 @@ public class Demo {
 									setSourceCellDataToDestination(spreadsheetDest, destinationColumnIndex, sourcecell);
 								}
 								performSearchCategory(spreadsheetDest, destinationColumnIndex, sourcecell);
-
 							}
 						}
 
 					}
 				}
 				pbStatus.setValue(rowIndex);
-			}
+			}			
 			FileOutputStream out = new FileOutputStream("ASM.xlsx");
 			workbookDestination.write(out);
 			out.close();
 			fis.close();
 			fisDestination.close();
+			applyCellFormat();
 			pbStatus.setMaximum(pbStatus.getValue());
 			JOptionPane.showMessageDialog(mainFrame, "Data Migrated Successfully into ASM Template!!!");
 
 		} catch (Exception ex) {
 			JOptionPane.showMessageDialog(mainFrame, ex.getMessage());
 		}
+	}
+
+	private void applyCellFormat() throws IOException {
+		FileInputStream fisDestination = new FileInputStream("ASM.xlsx");
+		
+		XSSFWorkbook workbookDestination = new XSSFWorkbook(fisDestination);
+		XSSFSheet spreadsheet = workbookDestination.getSheetAt(0);
+		//String monthFormat = "MMM-YY";
+		//String dateFormat = "DDD";
+		int rowCount = spreadsheet.getPhysicalNumberOfRows();
+		int colCount = spreadsheet.getRow(0).getPhysicalNumberOfCells();
+		for (int rowIndex = 2; rowIndex < rowCount; rowIndex++) {
+			for (int colIndex = 0; colIndex < colCount - 1; colIndex++) {
+				switch (colIndex) {
+					case CREATED_COL_INDEX: {
+						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+						if (currentCell== null ) {
+							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
+						}
+						currentCell.setCellType(Cell.CELL_TYPE_NUMERIC);
+						break;
+					}
+					case RESOLVED_COL_INDEX: {
+						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+						if (currentCell== null ) {
+							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
+						}
+						currentCell.setCellType(Cell.CELL_TYPE_NUMERIC);
+						break;
+	
+					}
+					case CLOSED_COL_INDEX: {
+						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+						if (currentCell== null ) {
+							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
+						}
+						currentCell.setCellType(Cell.CELL_TYPE_NUMERIC);
+						break;
+	
+					}
+					case REASSIGNMENT_COUNT: {
+						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+						if (currentCell== null ) {
+							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
+						}
+						currentCell.setCellType(Cell.CELL_TYPE_NUMERIC);
+						break;
+	
+					}				
+					case EFFORT_HRS:{
+						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+						if (currentCell== null ) {
+							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
+						}
+						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
+						currentCell.setCellFormula("E"+rowIndex+"-"+"D"+rowIndex);
+						break;
+					}
+					/*case RD_MON:{
+						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+						if (currentCell== null ) {
+							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
+						}
+						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);						
+						currentCell.setCellFormula("TEXT(E"+rowIndex+","+monthFormat+")");
+						break;
+					}
+					
+					case CR_MON:{
+						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+						if (currentCell== null ) {
+							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
+						}
+						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
+						currentCell.setCellFormula("TEXT(D"+rowIndex+","+monthFormat+")");
+						break;
+					}
+					case MON:{
+						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+						if (currentCell== null ) {
+							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
+						}
+						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
+						currentCell.setCellFormula("TEXT(F"+rowIndex+","+monthFormat+")");
+						break;
+					}
+					case DAY:{
+						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+						if (currentCell== null ) {
+							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
+						}
+						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
+						currentCell.setCellFormula("TEXT(D"+rowIndex+","+dateFormat +")");
+						break;
+					}
+					case TIME:{
+						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+						if (currentCell== null ) {
+							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
+						}
+						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
+						currentCell.setCellFormula("TEXT(D"+rowIndex+","+dateFormat +")");
+						break;
+					}*/
+					case MTTR_DURATION_DAYS:{
+						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+						if (currentCell== null ) {
+							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
+						}
+						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
+						currentCell.setCellFormula("F"+rowIndex+"-D"+rowIndex);
+						break;
+					}
+					case RD_MTTR:{
+						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+						if (currentCell== null ) {
+							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
+						}
+						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
+						currentCell.setCellFormula("E"+rowIndex+"-D"+rowIndex);
+						break;
+					}					
+				}
+			}
+		}
+		
+		FileOutputStream out = new FileOutputStream("ASM.xlsx");
+		workbookDestination.write(out);
+		out.close();		
+		fisDestination.close();
 	}
 
 	private void setSourceCellDataToDestination(XSSFSheet spreadsheetDest, int destinationColumnIndex,
@@ -387,7 +532,6 @@ public class Demo {
 		}
 		switch (sourceCell.getCellType()) {
 		case Cell.CELL_TYPE_STRING:
-
 			columnDestination.setCellValue(sourceCell.getStringCellValue());
 			break;
 		case Cell.CELL_TYPE_NUMERIC:
@@ -427,8 +571,7 @@ public class Demo {
 			}
 		}
 	}
-
-	@SuppressWarnings({ "resource" })
+	
 	private void showPopupExcelData(String excelFileName) throws IOException {
 		final JFrame popupFrame = new JFrame("View Excel File : " + excelFileName);
 		popupFrame.setSize(750, 600);
@@ -499,7 +642,6 @@ public class Demo {
 		popupFrame.setVisible(true);
 	}
 
-	@SuppressWarnings("resource")
 	private void createASMTemplateExcel() throws IOException {
 		File file = new File("ASM.xlsx");
 		if (file.exists()) {
@@ -507,7 +649,7 @@ public class Demo {
 		}
 
 		XSSFWorkbook workbook = new XSSFWorkbook();
-		XSSFSheet spreadsheet = workbook.createSheet("ASM");
+		XSSFSheet spreadsheet = workbook.createSheet("formula");
 		XSSFRow row = spreadsheet.createRow(0);
 		XSSFCell cell = row.createCell(0);
 		cell.setCellValue("Incident");
@@ -517,13 +659,13 @@ public class Demo {
 		cell.setCellValue("Priority");
 		cell = row.createCell(3);
 		cell.setCellValue("Created");
-		//cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+		// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
 		cell = row.createCell(4);
 		cell.setCellValue("Resolved");
-		//cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+		// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
 		cell = row.createCell(5);
 		cell.setCellValue("Closed");
-		//cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+		// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
 		cell = row.createCell(6);
 		cell.setCellValue("Status");
 		cell = row.createCell(7);
@@ -536,7 +678,7 @@ public class Demo {
 		cell.setCellValue("Severity");
 		cell = row.createCell(11);
 		cell.setCellValue("Reassignment count");
-		//cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+		// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
 		cell = row.createCell(12);
 		cell.setCellValue("Short Description");
 		cell = row.createCell(13);
@@ -576,7 +718,7 @@ public class Demo {
 		cell = row.createCell(30);
 		cell.setCellValue("L1.5 Scope");
 
-		workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
+		//workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
 
 		FileOutputStream out = new FileOutputStream(new File("ASM.xlsx"));
 		workbook.write(out);
@@ -601,7 +743,6 @@ class ComboBoxTableModel extends AbstractTableModel {
 		initilizeData(fileName);
 	}
 
-	@SuppressWarnings("resource")
 	public void initilizeData(String fileName) throws IOException {
 		FileInputStream fis = new FileInputStream(new File(fileName));
 		XSSFWorkbook workbook = new XSSFWorkbook(fis);
