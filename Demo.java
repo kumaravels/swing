@@ -30,8 +30,13 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -129,8 +134,7 @@ public class Demo {
 				int returnVal = fileDialog.showOpenDialog(mainFrame);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					java.io.File file = fileDialog.getSelectedFile();
-					// statusLabel.setText("File Selected :" + file.getName());
+					java.io.File file = fileDialog.getSelectedFile();					
 					sourceFileName = file.getAbsolutePath();
 					statusLabel.setText(sourceFileName);
 
@@ -392,122 +396,133 @@ public class Demo {
 		
 		XSSFWorkbook workbookDestination = new XSSFWorkbook(fisDestination);
 		XSSFSheet spreadsheet = workbookDestination.getSheetAt(0);
-		//String monthFormat = "MMM-YY";
-		//String dateFormat = "DDD";
+		String asmDateFormat = "MM/DD/YYYY HH:MM:SS";
+		String monthFormat = "MMM-YY";
+		String dateFormat = "DDD";
+		String hourFormat = "HH";
 		int rowCount = spreadsheet.getPhysicalNumberOfRows();
 		int colCount = spreadsheet.getRow(0).getPhysicalNumberOfCells();
-		for (int rowIndex = 2; rowIndex < rowCount; rowIndex++) {
-			for (int colIndex = 0; colIndex < colCount - 1; colIndex++) {
-				switch (colIndex) {
-					case CREATED_COL_INDEX: {
-						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
-						if (currentCell== null ) {
-							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
-						}
-						currentCell.setCellType(Cell.CELL_TYPE_NUMERIC);
-						break;
-					}
-					case RESOLVED_COL_INDEX: {
-						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
-						if (currentCell== null ) {
-							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
-						}
-						currentCell.setCellType(Cell.CELL_TYPE_NUMERIC);
-						break;
-	
-					}
-					case CLOSED_COL_INDEX: {
-						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
-						if (currentCell== null ) {
-							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
-						}
-						currentCell.setCellType(Cell.CELL_TYPE_NUMERIC);
-						break;
-	
-					}
-					case REASSIGNMENT_COUNT: {
-						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
-						if (currentCell== null ) {
-							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
-						}
-						currentCell.setCellType(Cell.CELL_TYPE_NUMERIC);
-						break;
-	
-					}				
-					case EFFORT_HRS:{
-						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
-						if (currentCell== null ) {
-							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
-						}
-						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
-						currentCell.setCellFormula("E"+rowIndex+"-"+"D"+rowIndex);
-						break;
-					}
-					/*case RD_MON:{
-						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
-						if (currentCell== null ) {
-							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
-						}
-						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);						
-						currentCell.setCellFormula("TEXT(E"+rowIndex+","+monthFormat+")");
-						break;
-					}
-					
-					case CR_MON:{
-						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
-						if (currentCell== null ) {
-							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
-						}
-						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
-						currentCell.setCellFormula("TEXT(D"+rowIndex+","+monthFormat+")");
-						break;
-					}
-					case MON:{
-						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
-						if (currentCell== null ) {
-							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
-						}
-						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
-						currentCell.setCellFormula("TEXT(F"+rowIndex+","+monthFormat+")");
-						break;
-					}
-					case DAY:{
-						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
-						if (currentCell== null ) {
-							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
-						}
-						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
-						currentCell.setCellFormula("TEXT(D"+rowIndex+","+dateFormat +")");
-						break;
-					}
-					case TIME:{
-						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
-						if (currentCell== null ) {
-							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
-						}
-						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
-						currentCell.setCellFormula("TEXT(D"+rowIndex+","+dateFormat +")");
-						break;
-					}*/
-					case MTTR_DURATION_DAYS:{
-						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
-						if (currentCell== null ) {
-							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
-						}
-						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
-						currentCell.setCellFormula("F"+rowIndex+"-D"+rowIndex);
-						break;
-					}
-					case RD_MTTR:{
-						XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
-						if (currentCell== null ) {
-							currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
-						}
-						currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
-						currentCell.setCellFormula("E"+rowIndex+"-D"+rowIndex);
-						break;
-					}					
+		for (int rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+			for (int colIndex = 0; colIndex < colCount; colIndex++) {
+				XSSFCell currentCell = spreadsheet.getRow(rowIndex).getCell(colIndex);
+				if (currentCell== null ) {
+					currentCell = spreadsheet.getRow(rowIndex).createCell(colIndex);
 				}
+				if ( rowIndex == 0){
+					CellStyle style = workbookDestination.createCellStyle();
+					style.setFillBackgroundColor(IndexedColors.BLUE_GREY.getIndex());
+                    style.setFillPattern(CellStyle.ALT_BARS);
+                    style.setBorderBottom(CellStyle.BORDER_THIN);
+                    style.setBottomBorderColor(IndexedColors.BLACK.getIndex());
+                    style.setBorderLeft(CellStyle.BORDER_THIN);
+                    style.setLeftBorderColor(IndexedColors.BLACK.getIndex());
+                    style.setBorderRight(CellStyle.BORDER_THIN);
+                    style.setRightBorderColor(IndexedColors.BLACK.getIndex());
+                    style.setBorderTop(CellStyle.BORDER_THIN);
+                    style.setTopBorderColor(IndexedColors.BLACK.getIndex());
+                    style.setFillForegroundColor(IndexedColors.BLACK.getIndex());                                        
+                    style.setFillPattern(CellStyle.ALT_BARS);
+                    
+                    XSSFFont font= workbookDestination.createFont();
+                    font.setFontHeightInPoints((short)10);
+                    font.setFontName("Arial");
+                    font.setColor(IndexedColors.WHITE.getIndex());
+                    font.setBold(true);
+                    font.setItalic(false);
+                    style.setFont(font);
+                    
+					currentCell.setCellStyle(style);					
+				}else{
+						switch (colIndex) {
+						case CREATED_COL_INDEX: {						
+							CreationHelper creationHelper = workbookDestination.getCreationHelper();
+							CellStyle cellStyle = workbookDestination.createCellStyle();
+							cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat(asmDateFormat));
+							currentCell.setCellStyle(cellStyle);
+							break;
+						}
+						case RESOLVED_COL_INDEX: {				
+							CreationHelper creationHelper = workbookDestination.getCreationHelper();
+							CellStyle cellStyle = workbookDestination.createCellStyle();
+							cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat(asmDateFormat));
+							currentCell.setCellStyle(cellStyle);
+							break;	
+						}
+						case CLOSED_COL_INDEX: {						
+							CreationHelper creationHelper = workbookDestination.getCreationHelper();
+							CellStyle cellStyle = workbookDestination.createCellStyle();
+							cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat(asmDateFormat));
+							currentCell.setCellStyle(cellStyle);
+							break;	
+						}
+						case REASSIGNMENT_COUNT: {						
+							currentCell.setCellType(Cell.CELL_TYPE_NUMERIC);
+							break;	
+						}				
+						case EFFORT_HRS:{						
+							currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
+							currentCell.setCellFormula("E"+rowIndex+1+"-"+"D"+rowIndex+1);
+							break;						
+						}
+						case RD_MON:{
+							currentCell.setCellType(Cell.CELL_TYPE_FORMULA);						
+							currentCell.setCellFormula("E"+rowIndex+1);
+							CreationHelper creationHelper = workbookDestination.getCreationHelper();
+							CellStyle cellStyle = workbookDestination.createCellStyle();
+							cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat(monthFormat));
+							currentCell.setCellStyle(cellStyle);
+							break;
+						}					
+						case CR_MON:{						
+							currentCell.setCellType(Cell.CELL_TYPE_FORMULA);						
+							currentCell.setCellFormula("D"+rowIndex+1);
+							CreationHelper creationHelper = workbookDestination.getCreationHelper();
+							CellStyle cellStyle = workbookDestination.createCellStyle();
+							cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat(monthFormat));
+							currentCell.setCellStyle(cellStyle);
+							break;
+						}
+						case MON:{
+							currentCell.setCellType(Cell.CELL_TYPE_FORMULA);						
+							currentCell.setCellFormula("F"+rowIndex+1);
+							CreationHelper creationHelper = workbookDestination.getCreationHelper();
+							CellStyle cellStyle = workbookDestination.createCellStyle();
+							cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat(monthFormat));
+							currentCell.setCellStyle(cellStyle);						
+							break;
+						}
+						case DAY:{
+							currentCell.setCellType(Cell.CELL_TYPE_FORMULA);						
+							currentCell.setCellFormula("D"+rowIndex+1);
+							CreationHelper creationHelper = workbookDestination.getCreationHelper();
+							CellStyle cellStyle = workbookDestination.createCellStyle();
+							cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat(dateFormat));
+							currentCell.setCellStyle(cellStyle);
+							break;
+						}
+						case TIME:{
+							currentCell.setCellType(Cell.CELL_TYPE_FORMULA);						
+							currentCell.setCellFormula("D"+rowIndex+1);
+							CreationHelper creationHelper = workbookDestination.getCreationHelper();
+							CellStyle cellStyle = workbookDestination.createCellStyle();
+							cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat(hourFormat));
+							currentCell.setCellStyle(cellStyle);
+							break;
+						}
+						case MTTR_DURATION_DAYS:{					
+							currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
+							currentCell.setCellFormula("F"+rowIndex+1+"-D"+rowIndex+1);
+							break;
+						}
+						case RD_MTTR:{						
+							currentCell.setCellType(Cell.CELL_TYPE_FORMULA);
+							currentCell.setCellFormula("E"+rowIndex+1+"-D"+rowIndex+1);
+							break;
+						}					
+					}
+				}
+				
+				
 			}
 		}
 		
@@ -716,9 +731,7 @@ public class Demo {
 		cell = row.createCell(29);
 		cell.setCellValue("3R Analysis");
 		cell = row.createCell(30);
-		cell.setCellValue("L1.5 Scope");
-
-		//workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
+		cell.setCellValue("L1.5 Scope");		
 
 		FileOutputStream out = new FileOutputStream(new File("ASM.xlsx"));
 		workbook.write(out);
@@ -758,9 +771,20 @@ class ComboBoxTableModel extends AbstractTableModel {
 
 			Cell cell = cellIterator.next();
 			data[rowIndex][0] = cell.getColumnIndex() + ":" + cell.getStringCellValue();
-			data[rowIndex][1] = validStates[0];
+			 
+			data[rowIndex][1] = getMatchedField(cell.getStringCellValue());//validStates[0];
 			rowIndex++;
 		}
+	}
+	
+	private String getMatchedField(String sourceFieldValue){
+		String matchedField = validStates[0];
+		for(String strASMField : validStates ){
+			if (strASMField.endsWith(sourceFieldValue)){
+				matchedField = strASMField;
+			}
+		}
+		return matchedField;
 	}
 
 	// Implementation of TableModel interface
