@@ -421,7 +421,7 @@ public class Asm {
                     style.setRightBorderColor(IndexedColors.BLACK.getIndex());
                     style.setBorderTop(CellStyle.BORDER_THIN);
                     style.setTopBorderColor(IndexedColors.BLACK.getIndex());
-                    style.setFillForegroundColor(IndexedColors.BLACK.getIndex());                                        
+                    style.setFillForegroundColor(IndexedColors.GREEN.getIndex());                                        
                     style.setFillPattern(CellStyle.ALT_BARS);
                     
                     XSSFFont font= workbookDestination.createFont();
